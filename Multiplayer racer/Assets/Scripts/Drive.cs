@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class Drive : MonoBehaviour
 {
-    public WheelCollider wc;
+    public WheelCollider[] wc;
     public float torque = 200f;
     public float maxSteerAngle = 30f;
-    public GameObject wheel;
+    public GameObject[] wheel;
+    public float maxBrakeTorque = 500f;
 
     // Start is called before the first frame update
     void Start()
     {
-        wc = GetComponent<WheelCollider>();
+ 
     }
 
     // Update is called once per frame
@@ -20,24 +21,47 @@ public class Drive : MonoBehaviour
     {
         float a = Input.GetAxis("Vertical");
         float steer = Input.GetAxis("Horizontal");
-        Go(a, steer);
+        float brake = Input.GetAxis("Jump");
+
+        Go(a, steer, brake);
+
+        
     }
 
-    public void Go(float acc, float s)
+    public void Go(float acc, float s, float b)
     {
         acc = Mathf.Clamp(acc, -1, 1);
         s = Mathf.Clamp(s, -1, 1) * maxSteerAngle;
+        b = Mathf.Clamp(b, 0, 1) * maxBrakeTorque;
 
         float thrustTorque = acc * torque;
-        wc.motorTorque = thrustTorque;
-        wc.steerAngle = s;
 
-        Quaternion q;
-        Vector3 pos;
-        wc.GetWorldPose(out pos,out q);
 
-        wheel.transform.position = pos;
-        wheel.transform.rotation = q;
+        for (int i = 0; i < wc.Length; i++)
+        {
+            wc[i].motorTorque = thrustTorque;
+            
+            if (i < 2)
+            {
+                wc[i].steerAngle = s;
+            }
+            else
+            {
+                wc[i].brakeTorque = b;
+            }
+
+            Quaternion q;
+            Vector3 pos;
+
+            wc[i].GetWorldPose(out pos, out q);
+
+            wheel[i].transform.position = pos;
+            wheel[i].transform.rotation = q;
+        }
+
+        
+
+        
 
     }
 }
