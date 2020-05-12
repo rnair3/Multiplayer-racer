@@ -14,10 +14,28 @@ public class Drive : MonoBehaviour
     public Transform skidTrailPrefab;
     Transform[] skidTrails = new Transform[4];
 
+    public ParticleSystem smoke;
+    ParticleSystem[] skidParticle = new ParticleSystem[4];
+
+    public GameObject[] brakeLight;
+
     // Start is called before the first frame update
     void Start()
     {
- 
+        for (int i = 0; i < 4; i++)
+        {
+            skidParticle[i] = Instantiate(smoke);
+            skidParticle[i].Stop();
+        }
+        ActivateDeactivateBrakeLights(false);
+    }
+
+    private void ActivateDeactivateBrakeLights(bool enable)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            brakeLight[i].SetActive(enable);
+        }
     }
 
     public void StartSkidTrail(int i)
@@ -76,9 +94,11 @@ public class Drive : MonoBehaviour
                 if (!skidSound.isPlaying)
                 {
                     skidSound.Play();
-                    //StartSkidTrail(i);
+                    
                 }
-
+                //StartSkidTrail(i);
+                skidParticle[i].transform.position = wc[i].transform.position - wc[i].transform.up * wc[i].radius;
+                skidParticle[i].Emit(1);
             }
             else
             {
@@ -97,6 +117,15 @@ public class Drive : MonoBehaviour
         acc = Mathf.Clamp(acc, -1, 1);
         s = Mathf.Clamp(s, -1, 1) * maxSteerAngle;
         b = Mathf.Clamp(b, 0, 1) * maxBrakeTorque;
+
+        if(b != 0)
+        {
+            ActivateDeactivateBrakeLights(true);
+        }
+        else
+        {
+            ActivateDeactivateBrakeLights(false);
+        }
 
         float thrustTorque = acc * torque;
 
