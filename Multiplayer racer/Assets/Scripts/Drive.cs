@@ -19,6 +19,18 @@ public class Drive : MonoBehaviour
 
     public GameObject[] brakeLight;
 
+    public AudioSource acceleration;
+    public Rigidbody rb;
+    public float gearLength = 3f;
+    public float currentSpeed { get { return rb.velocity.magnitude * gearLength; } }
+    public float lowPitch = 1f;
+    public float highPitch = 6f;
+    public int numGears = 5;
+    float rpm;
+    int currentGear = 1;
+    float currentGearPerc;
+    public float maxSpeed = 200f;  //km/hr
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +40,35 @@ public class Drive : MonoBehaviour
             skidParticle[i].Stop();
         }
         ActivateDeactivateBrakeLights(false);
+    }
+
+    public void CalculateEngineSound()
+    {
+        float gearPerc = 1/(float)numGears;
+        float targetGearFactor = Mathf.InverseLerp(gearPerc * currentGear, 
+            gearPerc * (currentGear + 1), Mathf.Abs(currentSpeed / maxSpeed));
+
+        currentGearPerc = Mathf.Lerp(currentGearPerc, targetGearFactor, Time.deltaTime * 5f);
+
+        var gearFactor = currentGear / (float)numGears;
+        rpm = Mathf.Lerp(gearFactor, 1, currentGearPerc);
+
+        float speedPerc = Mathf.Abs(currentSpeed / maxSpeed);
+        float upperGearMax = (1 / (float)numGears) * (currentGear + 1);
+        float downGearMax = (1 / (float)numGears) * (currentGear);
+
+        if(currentGear>0 && speedPerc < downGearMax)
+        {
+            currentGear--;
+        }
+
+        if(speedPerc>upperGearMax && currentGear < (numGears - 1))
+        {
+            currentGear++;
+        }
+
+        float pitch = Mathf.Lerp(lowPitch, highPitch, rpm);
+        acceleration.pitch = Mathf.Min(highPitch, pitch) * 0.25f;
     }
 
     private void ActivateDeactivateBrakeLights(bool enable)
@@ -66,17 +107,7 @@ public class Drive : MonoBehaviour
         Destroy(holder.gameObject, 30);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        float a = Input.GetAxis("Vertical");
-        float steer = Input.GetAxis("Horizontal");
-        float brake = Input.GetAxis("Jump");
 
-        Go(a, steer, brake);
-
-        CheckSkidding();
-    }
 
     public void CheckSkidding()
     {
@@ -127,7 +158,11 @@ public class Drive : MonoBehaviour
             ActivateDeactivateBrakeLights(false);
         }
 
-        float thrustTorque = acc * torque;
+        float thrustTorque = 0;
+        if (currentSpeed < maxSpeed)
+        {
+            thrustTorque = acc * torque;
+        }
 
 
         for (int i = 0; i < wc.Length; i++)
