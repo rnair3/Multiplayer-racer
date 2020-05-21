@@ -148,8 +148,8 @@ public class Drive : MonoBehaviour
         acc = Mathf.Clamp(acc, -1, 1);
         s = Mathf.Clamp(s, -1, 1) * maxSteerAngle;
         b = Mathf.Clamp(b, 0, 1) * maxBrakeTorque;
-
-        if(b != 0)
+        Debug.Log("0 - 1 brake: " + b);
+        if (b != 0)
         {
             ActivateDeactivateBrakeLights(true);
         }
@@ -187,9 +187,6 @@ public class Drive : MonoBehaviour
             wheel[i].transform.rotation = q;
         }
 
-        
-
-        
 
     }
 }
