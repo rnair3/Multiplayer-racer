@@ -28,7 +28,7 @@ public class Ghost : MonoBehaviour
 
     void OnDisable()
     {
-        if (rends == null)
+        if (rends != null)
         {
             foreach (Renderer r in rends)
             {
