@@ -9,11 +9,15 @@ public class PlayerController : MonoBehaviour
     Vector3 lastPos;
     Quaternion lastRot;
 
+    CheckpointManager cpm;
+
     // Start is called before the first frame update
     void Start()
     {
         ds = GetComponent<Drive>();
         GetComponent<Ghost>().enabled = false;
+        lastPos = ds.rb.gameObject.transform.position;
+        lastRot = ds.rb.gameObject.transform.rotation;
     }
 
     public void ResetLayer()
@@ -47,8 +51,12 @@ public class PlayerController : MonoBehaviour
 
         if(Time.time > lastTimeMoving + 4)
         {
-            ds.rb.gameObject.transform.position = lastPos;
-            ds.rb.gameObject.transform.rotation = lastRot;
+            if (cpm == null)
+            {
+                cpm = ds.rb.GetComponent<CheckpointManager>();
+            }
+            ds.rb.gameObject.transform.position = cpm.lastCP.transform.position + Vector3.up * 2; ;
+            ds.rb.gameObject.transform.rotation = cpm.lastCP.transform.rotation;
             ds.rb.gameObject.layer = 9;
             GetComponent<Ghost>().enabled = true;
             Invoke("ResetLayer", 3);

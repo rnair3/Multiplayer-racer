@@ -31,6 +31,10 @@ public class Drive : MonoBehaviour
     float currentGearPerc;
     public float maxSpeed = 200f;  //km/hr
 
+    public GameObject playerNamePrefab;
+    public Renderer carMesh;
+    string[] names = { "Adrian", "Lee", "Ryan", "Tom", "Kate", "Raj" };
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,6 +44,19 @@ public class Drive : MonoBehaviour
             skidParticle[i].Stop();
         }
         ActivateDeactivateBrakeLights(false);
+
+        GameObject playerName = Instantiate(playerNamePrefab);
+        playerName.GetComponent<NameUIController>().target = rb.gameObject.transform;
+
+        if (GetComponent<AIController>().enabled)
+        {
+            playerName.GetComponent<NameUIController>().playerName.text = names[Random.Range(0, names.Length)];
+        }
+        else
+        {
+            playerName.GetComponent<NameUIController>().playerName.text = "Human";
+        }
+        playerName.GetComponent<NameUIController>().rendr = carMesh;
     }
 
     public void CalculateEngineSound()
