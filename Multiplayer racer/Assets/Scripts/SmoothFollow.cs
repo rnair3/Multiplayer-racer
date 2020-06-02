@@ -1,39 +1,53 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SmoothFollow : MonoBehaviour
 {
-    public Transform target;
+    Transform[] target;
     public float distance = 8.0f;
     public float height = 1.5f;
     public float heightOffset = 1.0f;
     public float heightDamping = 4.0f;
     public float rotationDamping = 2.0f;
+    public RawImage rearCamView;
+    int index = 0;
 
     int FP = -1;
-   
+
     void Start()
     {
-        if(PlayerPrefs.HasKey("FP"))
+        if (PlayerPrefs.HasKey("FP"))
+        {
             FP = PlayerPrefs.GetInt("FP");
+        }
     }
 
-    // Update is called once per frame
     void LateUpdate()
     {
         if (target == null)
-            return;
-            
-        if(FP == 1)
         {
-            transform.position = target.position - target.forward * 0.4f + target.up;
-            transform.LookAt(target.position + target.forward * 3);
+            GameObject[] cars = GameObject.FindGameObjectsWithTag("Car");
+            target = new Transform[cars.Length];
+            for (int i = 0; i < cars.Length; i++)
+            {
+                target[i] = cars[i].transform;
+            }
+            target[index].Find("RearView").gameObject.GetComponent<Camera>().targetTexture =
+                                                            (rearCamView.texture as RenderTexture);
+            return;
+        }
+
+        if (FP == 1)
+        {
+            transform.position = target[index].position + target[index].forward * 0.4f + target[index].up;
+            transform.LookAt(target[index].position + target[index].forward * 3f);
         }
         else
         {
-            float wantedRotationAngle = target.eulerAngles.y;
-            float wantedHeight = target.position.y + height;
+            float wantedRotationAngle = target[index].eulerAngles.y;
+            float wantedHeight = target[index].position.y + height;
 
             float currentRotationAngle = transform.eulerAngles.y;
             float currentHeight = transform.position.y;
@@ -43,24 +57,31 @@ public class SmoothFollow : MonoBehaviour
 
             Quaternion currentRotation = Quaternion.Euler(0, currentRotationAngle, 0);
 
-            transform.position = target.position;
+            transform.position = target[index].position;
             transform.position -= currentRotation * Vector3.forward * distance;
 
             transform.position = new Vector3(transform.position.x,
                                     currentHeight + heightOffset,
                                     transform.position.z);
 
-            transform.LookAt(target);
+            transform.LookAt(target[index]);
         }
-        
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            FP = FP * -1;
+            FP *= -1;
             PlayerPrefs.SetInt("FP", FP);
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            target[index].Find("RearView").gameObject.GetComponent<Camera>().targetTexture = null;
+            index++;
+            if (index > target.Length - 1) index = 0;
+            target[index].Find("RearView").gameObject.GetComponent<Camera>().targetTexture =
+                                                              (rearCamView.texture as RenderTexture);
         }
     }
 }

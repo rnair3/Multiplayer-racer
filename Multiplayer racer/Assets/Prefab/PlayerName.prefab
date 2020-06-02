@@ -342,7 +342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8739be30dc79e1d40ad2134b642c0bba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerName: {fileID: 0}
+  playerName: {fileID: 6119569253002060762}
   lapsDisp: {fileID: 7688839950879775220}
   target: {fileID: 0}
   rendr: {fileID: 0}

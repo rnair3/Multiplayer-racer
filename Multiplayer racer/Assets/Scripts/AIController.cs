@@ -21,6 +21,7 @@ public class AIController : MonoBehaviour
     float lastTimeMoving = 0;
 
     CheckpointManager cpm;
+    float finishSteer;
 
 
     // Start is called before the first frame update
@@ -38,6 +39,7 @@ public class AIController : MonoBehaviour
         tracker.GetComponent<MeshRenderer>().enabled = false;
 
         GetComponent<Ghost>().enabled = false;
+        finishSteer = Random.Range(-1f, 1f);
     }
 
     public void ProgressTracker()
@@ -73,7 +75,21 @@ public class AIController : MonoBehaviour
             lastTimeMoving = Time.time;
             return;
         }
+
+        if (cpm == null)
+        {
+            cpm = ds.rb.GetComponent<CheckpointManager>();
+        }
+
+        if(cpm.lap == RaceMonitor.totalLaps + 1)
+        {
+            ds.acceleration.Stop();
+            ds.Go(0, finishSteer, 0);
+            return;
+        }
+
         ProgressTracker();
+
         Vector3 localTarget;
         float targetAngle;
         
@@ -82,12 +98,9 @@ public class AIController : MonoBehaviour
             lastTimeMoving = Time.time;
         }
 
-        if(Time.time > lastTimeMoving + 4)
+        if(Time.time > lastTimeMoving + 3 || ds.rb.gameObject.transform.position.y < -5 )
         {
-            if(cpm == null)
-            {
-                cpm = ds.rb.GetComponent<CheckpointManager>();
-            }
+           
             ds.rb.gameObject.transform.position = cpm.lastCP.transform.position + Vector3.up * 2;
             ds.rb.gameObject.transform.rotation = cpm.lastCP.transform.rotation;
             //    circuit.waypoints[currentTrackerWP].transform.position + Vector3.up * 2 + new Vector3(Random.Range(-1,1), 0, Random.Range(-1, 1));
@@ -127,9 +140,18 @@ public class AIController : MonoBehaviour
             acc = Mathf.Lerp(0, 1 * accSensitivity, 1 - cornerFactor);
         }
 
+        float prevTorque = ds.torque;
+        if(speedFactor <0.3f && ds.rb.gameObject.transform.forward.y > 0.1f)
+        {
+            ds.torque *= 3f;
+            acc = 1;
+            brake = 0;
+        }
 
         ds.Go(acc, steer, brake);
         ds.CalculateEngineSound();
         ds.CheckSkidding();
+
+        ds.torque = prevTorque;
     }
 }

@@ -29,6 +29,12 @@ public class Leaderboard
         return carsRegistered;
     }
 
+    public static void ResetValues()
+    {
+        lb.Clear();
+        carsRegistered = -1;
+    }
+
     public static void SetPosition(int reg, int lap, int cp, float time)
     {
         int position = lap * 1000 + cp;
@@ -51,5 +57,16 @@ public class Leaderboard
                 }
         }
         return "Unknown";
+    }
+
+    public static List<string> GetPositions()
+    {
+        List<string> places = new List<string>();
+        foreach (KeyValuePair<int, PlayerStats> pos in lb.OrderByDescending(key => key.Value.position).ThenBy(key => key.Value.time))
+        {
+            places.Add(pos.Value.playerName);
+        }
+        
+        return places;
     }
 }

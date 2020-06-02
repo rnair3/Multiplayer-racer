@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     Quaternion lastRot;
 
     CheckpointManager cpm;
+    float finishSteer;
 
     // Start is called before the first frame update
     void Start()
@@ -18,6 +19,7 @@ public class PlayerController : MonoBehaviour
         GetComponent<Ghost>().enabled = false;
         lastPos = ds.rb.gameObject.transform.position;
         lastRot = ds.rb.gameObject.transform.rotation;
+        finishSteer = Random.Range(-1f, 1f);
     }
 
     public void ResetLayer()
@@ -29,8 +31,18 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-        
+        if (cpm == null)
+        {
+            cpm = ds.rb.GetComponent<CheckpointManager>();
+        }
+
+        if (cpm.lap == RaceMonitor.totalLaps + 1)
+        {
+            ds.acceleration.Stop();
+            ds.Go(0, finishSteer, 0);
+            return;
+        }
+
         float a = Input.GetAxis("Vertical");
         float steer = Input.GetAxis("Horizontal");
         float brake = Input.GetAxis("Jump");
@@ -49,12 +61,9 @@ public class PlayerController : MonoBehaviour
 
         }
 
-        if(Time.time > lastTimeMoving + 4)
+        if(Time.time > lastTimeMoving + 4 || ds.rb.gameObject.transform.position.y < -5)
         {
-            if (cpm == null)
-            {
-                cpm = ds.rb.GetComponent<CheckpointManager>();
-            }
+            
             ds.rb.gameObject.transform.position = cpm.lastCP.transform.position + Vector3.up * 2; ;
             ds.rb.gameObject.transform.rotation = cpm.lastCP.transform.rotation;
             ds.rb.gameObject.layer = 9;

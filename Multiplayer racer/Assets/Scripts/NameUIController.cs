@@ -16,7 +16,7 @@ public class NameUIController : MonoBehaviour
     int carReg;
 
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
         transform.SetParent(GameObject.Find("Canvas").GetComponent<Transform>(), false);
         playerName = GetComponent<TextMeshProUGUI>();
