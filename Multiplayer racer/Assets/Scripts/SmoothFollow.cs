@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class SmoothFollow : MonoBehaviour
 {
     Transform[] target;
+    public static Transform playerCar;
     public float distance = 8.0f;
     public float height = 1.5f;
     public float heightOffset = 1.0f;
@@ -33,6 +34,7 @@ public class SmoothFollow : MonoBehaviour
             for (int i = 0; i < cars.Length; i++)
             {
                 target[i] = cars[i].transform;
+                if (target[i] == playerCar) index = i;
             }
             target[index].Find("RearView").gameObject.GetComponent<Camera>().targetTexture =
                                                             (rearCamView.texture as RenderTexture);

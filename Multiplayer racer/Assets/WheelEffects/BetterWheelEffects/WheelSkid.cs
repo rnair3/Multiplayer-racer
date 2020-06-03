@@ -32,7 +32,15 @@ public class WheelSkid : MonoBehaviour {
 		lastFixedUpdateTime = Time.time;
 	}
 
-	protected void FixedUpdate() {
+    private void Start()
+    {
+        if(skidmarksController == null)
+        {
+            skidmarksController = GameObject.FindGameObjectWithTag("Skidmark").GetComponent<Skidmarks>();
+        }
+    }
+
+    protected void FixedUpdate() {
 		lastFixedUpdateTime = Time.time;
 	}
 

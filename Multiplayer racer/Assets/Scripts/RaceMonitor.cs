@@ -11,7 +11,12 @@ public class RaceMonitor : MonoBehaviour
     public GameObject gameOverPanel;
     public GameObject HUD;
 
+    public GameObject[] carsPrefab;
+    public Transform[] spawns;
+
     CheckpointManager[] carsCPM;
+
+    int playerCar;
 
     // Start is called before the first frame update
     void Start()
@@ -23,6 +28,26 @@ public class RaceMonitor : MonoBehaviour
 
         StartCoroutine(PlayCountDown());
         gameOverPanel.SetActive(false);
+
+        playerCar = PlayerPrefs.GetInt("PlayerCar");
+        GameObject pcar = Instantiate(carsPrefab[playerCar]);
+
+        int randomStart = Random.Range(0, spawns.Length);
+        pcar.transform.position = spawns[randomStart].position;
+        pcar.transform.rotation = spawns[randomStart].rotation;
+
+        SmoothFollow.playerCar = pcar.gameObject.GetComponent<Drive>().rb.transform;
+        pcar.GetComponent<AIController>().enabled = false;
+        pcar.GetComponent<PlayerController>().enabled = true;
+
+        foreach (Transform t in spawns)
+        {
+            if (t == spawns[randomStart]) continue;
+            GameObject c = Instantiate(carsPrefab[Random.Range(0, carsPrefab.Length)]);
+            c.transform.position = t.position;
+            c.transform.rotation = t.rotation;
+        }
+
 
         GameObject[] cars = GameObject.FindGameObjectsWithTag("Car");
         carsCPM = new CheckpointManager[cars.Length];

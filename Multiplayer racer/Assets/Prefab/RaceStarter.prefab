@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2498229014605924572
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2498229014605924563}
+  - component: {fileID: 2498229014605924562}
+  m_Layer: 0
+  m_Name: RaceStarter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2498229014605924563
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498229014605924572}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.6845007, y: 0.831182, z: 15.916115}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2498229014605924562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498229014605924572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d57f7e5181bc7243b50c136dba5b8f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  countDown:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  gameOverPanel: {fileID: 0}
+  HUD: {fileID: 0}
+  carsPrefab:
+  - {fileID: 4733950229945303132, guid: 877bf9f94b69daf478894ebdd45f2776, type: 3}
+  - {fileID: 6352479977313423641, guid: 86790f7119ce0834c9c9b249997910c8, type: 3}
+  - {fileID: 6606620290814576996, guid: 392010dc9b60fd946ab37ab42a7dd773, type: 3}
+  - {fileID: 7874843181457679687, guid: b06a87c0a91dd094d9b1c07166784124, type: 3}
+  spawns:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
