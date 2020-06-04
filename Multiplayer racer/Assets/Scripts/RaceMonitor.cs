@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class RaceMonitor : MonoBehaviour
+using Photon.Realtime;
+using Photon.Pun;
+
+public class RaceMonitor : MonoBehaviourPunCallbacks
 {
     public GameObject[] countDown;
     public static bool racing = false;
@@ -17,6 +20,7 @@ public class RaceMonitor : MonoBehaviour
     CheckpointManager[] carsCPM;
 
     int playerCar;
+    public GameObject startRace;
 
     // Start is called before the first frame update
     void Start()
@@ -26,33 +30,69 @@ public class RaceMonitor : MonoBehaviour
             g.SetActive(false);
         }
 
-        StartCoroutine(PlayCountDown());
+        
         gameOverPanel.SetActive(false);
-
         playerCar = PlayerPrefs.GetInt("PlayerCar");
-        GameObject pcar = Instantiate(carsPrefab[playerCar]);
+        startRace.SetActive(false);
+
+        GameObject pcar = null;
 
         int randomStart = Random.Range(0, spawns.Length);
-        pcar.transform.position = spawns[randomStart].position;
-        pcar.transform.rotation = spawns[randomStart].rotation;
+        Vector3 startPos = spawns[randomStart].position;
+        Quaternion startRot= spawns[randomStart].rotation;
+
+        if (PhotonNetwork.IsConnected)
+        {
+            startPos = spawns[PhotonNetwork.CurrentRoom.PlayerCount - 1].position;
+            startRot = spawns[PhotonNetwork.CurrentRoom.PlayerCount - 1].rotation;
+            if (NetworkedPlayer.localPlayerInstance == null)
+            {
+                pcar = PhotonNetwork.Instantiate(carsPrefab[playerCar].name, startPos, startRot, 0);
+            }
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                startRace.SetActive(true);
+            }
+        }
+        else
+        {
+
+            pcar = Instantiate(carsPrefab[playerCar]);
+            pcar.transform.position = startPos;
+            pcar.transform.rotation = startRot;
+
+            foreach (Transform t in spawns)
+            {
+                if (t == spawns[randomStart]) continue;
+                GameObject c = Instantiate(carsPrefab[Random.Range(0, carsPrefab.Length)]);
+                c.transform.position = t.position;
+                c.transform.rotation = t.rotation;
+            }
+
+            StartGame();
+        }
+
+        
 
         SmoothFollow.playerCar = pcar.gameObject.GetComponent<Drive>().rb.transform;
         pcar.GetComponent<AIController>().enabled = false;
+        pcar.GetComponent<Drive>().enabled = true;
         pcar.GetComponent<PlayerController>().enabled = true;
 
-        foreach (Transform t in spawns)
-        {
-            if (t == spawns[randomStart]) continue;
-            GameObject c = Instantiate(carsPrefab[Random.Range(0, carsPrefab.Length)]);
-            c.transform.position = t.position;
-            c.transform.rotation = t.rotation;
-        }
+        
+    }
+
+    public void StartGame()
+    {
+        StartCoroutine(PlayCountDown());
+        startRace.SetActive(false);
 
 
         GameObject[] cars = GameObject.FindGameObjectsWithTag("Car");
         carsCPM = new CheckpointManager[cars.Length];
 
-        for(int i = 0; i < cars.Length; i++)
+        for (int i = 0; i < cars.Length; i++)
         {
             carsCPM[i] = cars[i].GetComponent<CheckpointManager>();
         }
@@ -73,6 +113,7 @@ public class RaceMonitor : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
+        if (!racing) return;
         int finishCount = 0;
 
         foreach(CheckpointManager cpm in carsCPM)

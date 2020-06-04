@@ -18,10 +18,10 @@ public class DisplayPosition : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        List<string> places = Leaderboard.GetPositions();
-        first.text = places[0];
-        second.text = places[1];
-        third.text = places[2];
-        fourth.text = places[3];
+        //List<string> places = Leaderboard.GetPositions();
+        //first.text = places[0];
+        //second.text = places[1];
+        //third.text = places[2];
+        //fourth.text = places[3];
     }
 }
