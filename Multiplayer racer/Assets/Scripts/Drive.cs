@@ -33,6 +33,7 @@ public class Drive : MonoBehaviour
 
     public GameObject playerNamePrefab;
     public Renderer carMesh;
+    public string netName = "";
     string[] names = { "Adrian", "Lee", "Ryan", "Tom", "Kate", "Raj" };
 
     // Start is called before the first frame update
@@ -49,8 +50,16 @@ public class Drive : MonoBehaviour
         playerName.GetComponent<NameUIController>().target = rb.gameObject.transform;
 
         if (GetComponent<AIController>().enabled)
-        {
-            playerName.GetComponent<NameUIController>().playerName.text = names[Random.Range(0, names.Length)];
+        { 
+            if(netName != "")
+            {
+                playerName.GetComponent<NameUIController>().playerName.text = netName;
+            }
+            else
+            {
+                playerName.GetComponent<NameUIController>().playerName.text = names[Random.Range(0, names.Length)];
+            }
+            
         }
         else
         {

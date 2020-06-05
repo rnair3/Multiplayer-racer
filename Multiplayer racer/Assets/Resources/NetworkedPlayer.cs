@@ -23,7 +23,15 @@ public class NetworkedPlayer : MonoBehaviourPunCallbacks
         {
             GameObject playerName = Instantiate(playerNamePrefab);
             playerName.GetComponent<NameUIController>().target = rb.gameObject.transform;
-            playerName.GetComponent<TextMeshProUGUI>().text = photonView.Owner.NickName;
+            string setName = null;
+            if (photonView.InstantiationData != null)
+            {
+                setName = (string)photonView.InstantiationData[0];
+            }
+            if (setName != null)
+                playerName.GetComponent<TextMeshProUGUI>().text = setName;
+            else
+                playerName.GetComponent<TextMeshProUGUI>().text = photonView.Owner.NickName;
             playerName.GetComponent<NameUIController>().rendr = carMesh;
         }
     }

@@ -21,10 +21,12 @@ public class RaceMonitor : MonoBehaviourPunCallbacks
 
     int playerCar;
     public GameObject startRace;
+    public GameObject waitingText;
 
     // Start is called before the first frame update
     void Start()
     {
+        racing = false;
         foreach(GameObject g in countDown)
         {
             g.SetActive(false);
@@ -34,6 +36,7 @@ public class RaceMonitor : MonoBehaviourPunCallbacks
         gameOverPanel.SetActive(false);
         playerCar = PlayerPrefs.GetInt("PlayerCar");
         startRace.SetActive(false);
+        waitingText.SetActive(false);
 
         GameObject pcar = null;
 
@@ -43,8 +46,8 @@ public class RaceMonitor : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsConnected)
         {
-            startPos = spawns[PhotonNetwork.CurrentRoom.PlayerCount - 1].position;
-            startRot = spawns[PhotonNetwork.CurrentRoom.PlayerCount - 1].rotation;
+            startPos = spawns[PhotonNetwork.LocalPlayer.ActorNumber - 1].position;
+            startRot = spawns[PhotonNetwork.LocalPlayer.ActorNumber - 1].rotation;
             if (NetworkedPlayer.localPlayerInstance == null)
             {
                 pcar = PhotonNetwork.Instantiate(carsPrefab[playerCar].name, startPos, startRot, 0);
@@ -53,6 +56,10 @@ public class RaceMonitor : MonoBehaviourPunCallbacks
             if (PhotonNetwork.IsMasterClient)
             {
                 startRace.SetActive(true);
+            }
+            else
+            {
+                waitingText.SetActive(true);
             }
         }
         else
@@ -83,10 +90,39 @@ public class RaceMonitor : MonoBehaviourPunCallbacks
         
     }
 
+
+    public void BeginGame()
+    {
+        int numPlayers = PhotonNetwork.CurrentRoom.MaxPlayers - PhotonNetwork.CurrentRoom.PlayerCount;
+        string[] names = { "Adrian", "Lee", "Ryan", "Tom", "Kate", "Raj" };
+        for (int i = PhotonNetwork.CurrentRoom.PlayerCount; i < PhotonNetwork.CurrentRoom.MaxPlayers; i++)
+        {
+            Vector3 startPos = spawns[i].position;
+            Quaternion startRot = spawns[i].rotation;
+            int r = Random.Range(0, carsPrefab.Length);
+
+            object[] instanceData = new object[1];
+            instanceData[0] = (string)names[Random.Range(0, names.Length)];
+
+            GameObject AICar = PhotonNetwork.Instantiate(carsPrefab[r].name, startPos, startRot, 0, instanceData);
+            AICar.GetComponent<AIController>().enabled = true;
+            AICar.GetComponent<Drive>().enabled = true;
+            AICar.GetComponent<Drive>().netName = (string)instanceData[0];
+            AICar.GetComponent<PlayerController>().enabled = false;
+        }
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("StartGame", RpcTarget.All, null);
+        }
+    }
+
+    [PunRPC]
     public void StartGame()
     {
         StartCoroutine(PlayCountDown());
         startRace.SetActive(false);
+        waitingText.SetActive(false);
 
 
         GameObject[] cars = GameObject.FindGameObjectsWithTag("Car");
@@ -110,6 +146,16 @@ public class RaceMonitor : MonoBehaviourPunCallbacks
         racing = true;
     }
 
+    //bool raceOver = false;
+    //private void Update()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.R))
+    //    {
+    //        raceOver = true;
+    //    }
+    //}
+
+
     // Update is called once per frame
     void LateUpdate()
     {
@@ -124,15 +170,25 @@ public class RaceMonitor : MonoBehaviourPunCallbacks
             }
         }
 
-        if(finishCount == carsCPM.Length)
+        if(finishCount == carsCPM.Length )//|| raceOver)
         {
             HUD.SetActive(false);
             gameOverPanel.SetActive(true);
         }
     }
 
+    [PunRPC]
+    public void RestartGame()
+    {
+        PhotonNetwork.LoadLevel("Tracks");
+    }
+
     public void RestartLevel()
     {
-        SceneManager.LoadScene("Tracks");
+        racing = false;
+        if (PhotonNetwork.IsConnected)
+            photonView.RPC("RestartGame", RpcTarget.All, null);
+        else
+            SceneManager.LoadScene("Tracks");
     }
 }
